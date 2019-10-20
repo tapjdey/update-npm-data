@@ -249,8 +249,8 @@ def update_status(statusfile, pkglist):
 
 	PRurl = []
 
-	f1 = open('issues','w')
-	f2 = open('PR', 'w')
+	#f1 = open('issues','w')
+	#f2 = open('PR', 'w')
 
 	for k in status['repodict'].keys():
 		count += 1
@@ -271,11 +271,11 @@ def update_status(statusfile, pkglist):
 				entry = {'packages': status['repodict'][k], 'issue': e, 'number': i }
 				if 'pull_request' in e.keys():
 					PRurl.append(e['pull_request']['url']+','+','.join(status['repodict'][k]) )
-				#coll .insert (i, check_keys=False)
-				json.dump(entry, f1)
-				f1.write('\n\n')
+				coll .insert (i, check_keys=False)
+				#json.dump(entry, f1)
+				#f1.write('\n\n')
 	
-	f1.close()		
+	#f1.close()		
 	print ('Writing New Status File ...........\n')		
 		
 
@@ -297,12 +297,12 @@ def update_status(statusfile, pkglist):
 
 		t = get(url)
 		e = {'pullReq':t, 'packages':pkgs}
-		#collput .insert (e, check_keys=False)
-		json.dump(e, f2)
-		f2.write('\n\n')
+		collput .insert (e, check_keys=False)
+		#json.dump(e, f2)
+		#f2.write('\n\n')
 
 	
-	f2.close()
+	#f2.close()
 
 	return
 
