@@ -27,40 +27,66 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         print()
 
 
-def get_project(k):
+def get_project(k, fl, skip = 0):
 	#Get list of all npm packages from replicate database
-	r = requests.get('https://replicate.npmjs.com/_all_docs?limit=500')
-	#r = requests.get('https://replicate.npmjs.com/_all_docs') # URL with all package names
+	#r = requests.get('https://replicate.npmjs.com/_all_docs?limit=500')
+	r = requests.get('https://replicate.npmjs.com/_all_docs') # URL with all package names
 
-	pkgs = set()
+	#pkgs = set()
 	if r.ok : 
 		pagedata  = r.json()
-		#n_pkg = pagedata['total_rows']
-		n_pkg = 500
+		n_pkg = pagedata['total_rows']
+		#n_pkg = 500
 		print ('Obtained ',n_pkg, ' NPM packages, Processing........\n')
 
 		# Get downloads for last month
 		i = 0
+		pl = []
+		print ('Begin Checking Packages matching the criteria .....\n')
 
 		for item in pagedata['rows']:
 			i += 1
-			printProgressBar(i, n_pkg)
+			if i < skip:
+				continue
+
+			pkg = item['key']
+			print ('\r....'+str(i)+'...'+str(pkg)+'.....', end='\r')
 			# Stop overloading
 			if i%500 == 0: 
 				time.sleep(1)
 			elif i % 10000 == 0:
 				time.sleep(10)
+			
+			if '@' in pkg:
+				url = 'https://api.npmjs.org/downloads/point/last-month/'+pkg # URL with download counts
+				d = requests.get(url)
+				if d.ok:
+					dl = d.json()
+					try:
+						if int(dl['downloads']) > k: 
+							with open(fl, 'a') as f:
+								f.write(str(pkg)+','+str(i)+'\n')
+					except:
+						pass
+			else:
+				pl.append(pkg)
 
-			pkg = item['key']
-			url = 'https://api.npmjs.org/downloads/point/last-month/'+pkg # URL with download counts
-			d = requests.get(url)
-			if d.ok:
-				dl = d.json()
-				if int(dl['downloads']) > k: 
-					print('')
-					pkgs.add(pkg)
+			if len(pl) == 128:
+				url = 'https://api.npmjs.org/downloads/point/last-month/'+','.join(pl) # URL with download counts
+				d = requests.get(url)
+				pl = []
+				if d.ok:
+					dl = d.json()
+					for kw in dl.keys():
+						try:
+							if int(dl[kw]['downloads']) > k:
+								with open(fl, 'a') as f:
+									f.write(str(kw)+','+str(i)+'\n')
+						except:
+							pass
+
 	print()
-	return pkgs
+	return 
 
 
 if __name__ == '__main__':

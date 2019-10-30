@@ -57,13 +57,19 @@ def get_ghome(status, pkglist):
 
 				v = obj['versions'][latest]
 				try: 
-					ghome = v['repository']['url']	                
+					ghome = v['repository']['url']
+					if type(ghome) != str:
+						raise Exception(0)
 				except: 
 					try:
-						 ghome = v['homepage']	                    
+						 ghome = v['homepage']
+						if type(ghome) != str:
+							raise Exception(0)
 					except:
 						try:
-							ghome = v['repository']	                        
+							ghome = v['repository']
+							if type(ghome) != str:
+								raise Exception(0)
 						except:
 							pass
 			
@@ -73,7 +79,10 @@ def get_ghome(status, pkglist):
 				#print ('not found')
 				pass
 			else:
-				ghome = re.sub(r'#.*', '', ghome)
+				try:
+					ghome = re.sub(r'#.*', '', ghome)
+				except:
+					pass
 				#print (ghome)
 				try: 
 					ghome2 = ghome.replace('www.','').split('.')[1]
@@ -239,8 +248,16 @@ def update_status(statusfile, pkglist):
 		status = {'pkglist':[], 'repodict':{}, 'issue_count':{}, 'deleted_pkgs':[]}
 
 	# Get GitHub Home pages and update status
-	print ('Getting GitHub Home pages of packages............\n')
-	new_status = get_ghome(status, pkglist)
+	update = input('Do You want to Update the GitHub Home Pages? (y/*)')
+	if update == 'y':
+
+
+		print ('Getting GitHub Home pages of packages............\n')
+		new_status = get_ghome(status, pkglist)
+
+		with open(statusfile, 'w') as f:
+			json.dump(new_status, f)
+
 
 	# Get Issue Counts for repos
 	tot = len(status['repodict'].keys())

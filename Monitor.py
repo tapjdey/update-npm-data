@@ -8,7 +8,7 @@
 6. Update status 
 7. Call processor script
 '''
-import pymongo, json, gzip
+import pymongo, json, gzip, sys
 from Get_project import get_project
 from Update_status import update_status 
 
@@ -17,16 +17,16 @@ if __name__ == '__main__':
 	update = input('Do You want to Update the Project List? (y/*)')
 	if update == 'y':
 
-		project_list = get_project(10000)
+		get_project(10000, './data/pkglist.csv', 0)
 		# save project names in a file
-		print ('Saving package list .......\n')
-		with gzip.open('./data/pkglist.csv.gz', 'wt') as f:
-			f.write(','.join(project_list))
+		# print ('Saving package list .......\n')
+		# with gzip.open('./data/pkglist.csv.gz', 'wt') as f:
+		# 	f.write(','.join(project_list))
 	else:
 		print ('Using Old List ......... \n')
-		with gzip.open('./data/pkglist.csv.gz', 'rt') as f:
-			project_list = (f.read()).split(',')
-
+	
+	with open('./data/pkglist.csv', 'r') as f:
+			project_list = [p.split(',')[0] for p in f.readlines()]
 
 
 	print('Updating Current Status ............\n')
